@@ -1,0 +1,183 @@
+<html>
+<head>
+
+<style type="text/css">
+<!--
+input.san {	/* ゲーム用ボタン色指定 */
+	background-color: white;
+	color: black;
+}
+input#sanRs {	/* リセットボタン色指定 */
+	background-color: cyan;
+	color: white;
+}
+-->
+</style>
+<script type="text/javascript" language="JavaScript">
+<!--
+var onBackgroundColor1 = "cyan";	// ボタンにマウスが乗ったときの背景色（×を打つとき）変数
+var onBackgroundColor2 = "pink";	// ボタンにマウスが乗ったときの背景色（○を打つとき）
+var BackgroundColor = "white";	// ボタンの通常背景色
+var textColor = "black";	// Resetボタンの通常色（文字）
+var strongTextColor = "red";	// Resetボタンの強調色（文字）
+var onTextColor = "black";	// ○×の文字色
+var offTextColor = "white";	// ○×を表示していないときの文字色（隠している）
+var san_te = 0;	// 手数-1
+var san_v = 0;	// 勝敗判定フラグ
+var brw;	// ブラウザ判定フラグ
+
+// ブラウザ判定
+if (document.layers) {	// NN4
+	brw = "N4";
+} else if (document.all) {	// IE4-, Opera6-
+	brw = "IE";
+} else if (document.getElementById) {	// DOM (N6-)
+	brw = "DOM";
+} else {
+	brw = "";	// unknown browser
+}
+
+function getObj(id)
+{
+	// 各ボタンのオブジェクトを取得
+	if (brw == "N4" || brw == "") {	// NN4, unknown browser
+		return document.forms[0].elements[id];
+	} else if (brw == "IE") {	// IE4-, Opera6-
+		return document.all.item(id);
+	} else if (brw == "DOM") {	// DOM (N6-)
+		return document.getElementById(id);
+	}
+}
+
+function chengeBt(x, y)
+{
+	// ボタンが押されたら…
+	var obj = getObj("san" + x + y);
+	if (!san_v) {
+		// 直前まで決着がついてない
+		if (obj.value == "＿") {
+			obj.value = san_te % 2 ? "×" : "○";	// プレイヤーを判別し○×を設定
+			if (brw == "IE" || brw == "DOM") {	// IE4-, Opera6-, DOM(N6-)
+				obj.style.color = onTextColor;
+			}
+			// 勝敗判定
+			if ((getObj("san" + x + 0).value == getObj("san" + x + 1).value) && (getObj("san" + x + 0).value == getObj("san" + x + 2).value)
+			 || (getObj("san" + 0 + y).value == getObj("san" + 1 + y).value) && (getObj("san" + 0 + y).value == getObj("san" + 2 + y).value)) {
+				//縦横に3目揃った
+				victory();
+			} else if (((getObj("san11").value == "○") || (getObj("san11").value == "×"))
+			 && (((getObj("san00").value == getObj("san11").value) && (getObj("san00").value == getObj("san22").value))
+			  || ((getObj("san20").value == getObj("san11").value) && (getObj("san20").value == getObj("san02").value)))) {
+				//斜めに3目揃った
+				victory();
+			}
+			san_te++;
+		}
+	}
+	obj.blur();
+}
+
+function victory()
+{
+	// 勝敗通達（chengeBt()より）
+	san_v = 1;
+	if (brw == "IE" || brw == "DOM") {	// IE4-, Opera6-, DOM(N6-)
+		getObj("sanRs").style.color = strongTextColor;
+	}
+	alert("勝負あり！");
+}
+
+function resetBt(id)
+{
+	// 初期化
+	var obj;
+	for(var i = 0; i < 3; i++) {
+		for(var j = 0; j < 3; j++) {
+			obj = getObj("san" + i + j);
+			obj.value = "＿";
+			if (brw == "IE" || brw == "DOM") {	// IE4-, Opera6-, DOM(N6-)
+				resetBtColor(obj);
+			}
+		}
+	}
+	san_te = san_v = 0;
+}
+
+function resetBtColor(obj)
+{
+	// 文字色初期化（resetBt()より）
+	obj.style.backgroundColor = BackgroundColor;
+	obj.style.color = offTextColor;
+	getObj("sanRs").style.color = textColor;
+}
+
+function OMOver(x, y)
+{
+	// マウスが乗ったとき背景色を変える
+	if (brw == "IE" || brw == "DOM") {	// IE4-, Opera6-, DOM(N6-)
+		var obj = getObj("san" + x + y);
+		if (obj.value == "＿" && !san_v) {
+			bgChenge(obj, san_te % 2 ? onBackgroundColor1 : onBackgroundColor2);
+		}
+	}
+}
+
+function OMOut(x, y)
+{
+	// マウスが離れたとき背景色を戻す
+	if (brw == "IE" || brw == "DOM") {	// IE4-, Opera6-, DOM(N6-)
+		var obj = getObj("san" + x + y);
+		if (obj.value == "＿" && !san_v) {
+			bgChenge(obj, BackgroundColor);
+		}
+	}
+}
+
+function bgChenge(obj, col)
+{
+	// ボタン（押されてないもののみ）の背景色を変更する（OMOver()、OMOut()より）
+	obj.style.backgroundColor = col;
+	obj.style.color = col;
+}
+// -->
+</script>
+
+
+</head>
+<body>
+<script>
+document.write("JavaScriptはONです");
+alert("http://homepage1.nifty.com/chaki-el/pc/js/tips02.htm");
+
+</script>
+
+<script type="text/javascript" language="JavaScript">
+<!--
+if (brw == "N4" || brw == "") {	// NN4, unknown browser
+	document.writeln("<form>");
+}
+document.writeln("<center>");
+document.write('<input id="san00" name="san00" class="san" type="button" value="＿" onClick="chengeBt(0, 0);" onMouseOver="OMOver(0, 0);" onMouseOut="OMOut(0, 0);">');
+document.write('<input id="san01" name="san01" class="san" type="button" value="＿" onClick="chengeBt(0, 1);" onMouseOver="OMOver(0, 1);" onMouseOut="OMOut(0, 1);">');
+document.writeln('<input id="san02" name="san02" class="san" type="button" value="＿" onClick="chengeBt(0, 2);" onMouseOver="OMOver(0, 2);" onMouseOut="OMOut(0, 2);"><br>');
+document.write('<input id="san10" name="san10" class="san" type="button" value="＿" onClick="chengeBt(1, 0);" onMouseOver="OMOver(1, 0);" onMouseOut="OMOut(1, 0);">');
+document.write('<input id="san11" name="san11" class="san" type="button" value="＿" onClick="chengeBt(1, 1);" onMouseOver="OMOver(1, 1);" onMouseOut="OMOut(1, 1);">');
+document.writeln('<input id="san12" name="san12" class="san" type="button" value="＿" onClick="chengeBt(1, 2);" onMouseOver="OMOver(1, 2);" onMouseOut="OMOut(1, 2);"><br>');
+document.write('<input id="san20" name="san20" class="san" type="button" value="＿" onClick="chengeBt(2, 0);" onMouseOver="OMOver(2, 0);" onMouseOut="OMOut(2, 0);">');
+document.write('<input id="san21" name="san21" class="san" type="button" value="＿" onClick="chengeBt(2, 1);" onMouseOver="OMOver(2, 1);" onMouseOut="OMOut(2, 1);">');
+document.writeln('<input id="san22" name="san22" class="san" type="button" value="＿" onClick="chengeBt(2, 2);" onMouseOver="OMOver(2, 2);" onMouseOut="OMOut(2, 2);"><br><br>');
+document.writeln('<input id="sanRs" name="sanRs" type="button" value="Reset" onClick="resetBt();">');
+document.writeln("</center>");
+if (brw == "N4" || brw == "") {	// NN4, unknown browser
+	document.writeln("</form>");
+}
+resetBt();
+//-->
+</script>
+<noscript>
+<strong>！ご利用のブラウザには対応していません</strong><br>
+</noscript>
+
+
+</body>
+</html>
